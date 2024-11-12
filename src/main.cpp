@@ -19,7 +19,7 @@
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 //void mouse_callback(GLFWwindow* window, double xpos, double ypos);
-//void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
+void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
 void processInput(GLFWwindow* window);
 void generateSierpinskiTetrahedron(std::vector<float>& vertices, glm::vec3 a, glm::vec3 b, glm::vec3 c, glm::vec3 d, int depth);
 
@@ -32,6 +32,9 @@ Camera camera(glm::vec3(0.0f, 0.0f, 3.0f));
 float lastX = SCR_WIDTH / 2.0f;
 float lastY = SCR_HEIGHT / 2.0f;
 bool firstMouse = true;
+
+glm::vec3 center(0.0f, 0.0f, -0.5f); // Pozycja centrum piramidy
+
 
 // timing
 float deltaTime = 0.0f;	// time between current frame and last frame
@@ -148,7 +151,7 @@ int main()
     ourShader.setInt("texture1", 0);
 
     //glfwSetCursorPosCallback(window, mouse_callback);
-    //glfwSetScrollCallback(window, scroll_callback);
+    glfwSetScrollCallback(window, scroll_callback);
 
     //glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
@@ -195,8 +198,9 @@ int main()
         glm::mat4 projection = glm::perspective(glm::radians(camera.Zoom), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
         ourShader.setMat4("projection", projection);
         // camera/view transformation
-        glm::mat4 view = camera.GetViewMatrix();
+        glm::mat4 view = camera.GetViewMatrix(center);
         ourShader.setMat4("view", view);
+
 
         ourShader.setMat4("model", model);
 
@@ -233,14 +237,15 @@ void processInput(GLFWwindow* window)
     if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
         glfwSetWindowShouldClose(window, true);
 
+    //don't ask - quick fix
     if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
-        camera.ProcessKeyboard(FORWARD, deltaTime);
+        camera.ProcessKeyboard(LEFT, deltaTime, center);
     if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
-        camera.ProcessKeyboard(BACKWARD, deltaTime);
+        camera.ProcessKeyboard(RIGHT, deltaTime, center);
     if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
-        camera.ProcessKeyboard(LEFT, deltaTime);
+        camera.ProcessKeyboard(FORWARD, deltaTime, center);
     if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
-        camera.ProcessKeyboard(RIGHT, deltaTime);
+        camera.ProcessKeyboard(BACKWARD, deltaTime, center);
 }
 
 // glfw: whenever the window size changed (by OS or user resize) this callback function executes

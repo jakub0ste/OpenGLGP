@@ -16,7 +16,7 @@ enum Camera_Movement {
 // Default camera values
 const float YAW = -90.0f;
 const float PITCH = 0.0f;
-const float SPEED = 2.5f;
+const float SPEED = 58.5f;
 const float SENSITIVITY = 0.1f;
 const float ZOOM = 45.0f;
 
@@ -59,24 +59,37 @@ public:
     }
 
     // returns the view matrix calculated using Euler Angles and the LookAt Matrix
-    glm::mat4 GetViewMatrix()
+    glm::mat4 GetViewMatrix(glm::vec3 center)
     {
-        return glm::lookAt(Position, Position + Front, Up);
+        return glm::lookAt(Position, center, Up);
     }
 
+
     // processes input received from any keyboard-like input system. Accepts input parameter in the form of camera defined ENUM (to abstract it from windowing systems)
-    void ProcessKeyboard(Camera_Movement direction, float deltaTime)
+    void ProcessKeyboard(Camera_Movement direction, float deltaTime, const glm::vec3& center)
     {
         float velocity = MovementSpeed * deltaTime;
+        glm::vec3 directionVector;
+
         if (direction == FORWARD)
-            Position += Front * velocity;
+            directionVector = glm::vec3(0.0f, 1.0f, 0.0f); // Obrót do góry
         if (direction == BACKWARD)
-            Position -= Front * velocity;
+            directionVector = glm::vec3(0.0f, -1.0f, 0.0f); // Obrót w dó³
         if (direction == LEFT)
-            Position -= Right * velocity;
+            directionVector = glm::vec3(1.0f, 0.0f, 0.0f); // Obrót w lewo
         if (direction == RIGHT)
-            Position += Right * velocity;
+            directionVector = glm::vec3(-1.0f, 0.0f, 0.0f); // Obrót w prawo
+
+        // Oblicz now¹ pozycjê kamery
+        glm::vec3 offset = Position - center;
+        glm::mat4 rotation = glm::rotate(glm::mat4(1.0f), glm::radians(velocity), directionVector);
+        offset = glm::vec3(rotation * glm::vec4(offset, 1.0f));
+        Position = center + offset;
+
+        // Zaktualizuj wektory kamery
+        updateCameraVectors();
     }
+
 
     // processes input received from a mouse input system. Expects the offset value in both the x and y direction.
     void ProcessMouseMovement(float xoffset, float yoffset, GLboolean constrainPitch = true)
