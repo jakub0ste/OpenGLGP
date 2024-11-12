@@ -24,6 +24,7 @@ void processInput(GLFWwindow* window);
 void generateSierpinskiTetrahedron(std::vector<float>& vertices, glm::vec3 a, glm::vec3 b, glm::vec3 c, glm::vec3 d, int depth);
 
 bool useColor = false;
+glm::vec3 vertexColor(1.0f, 0.0f, 0.0f);
 
 // settings
 const unsigned int SCR_WIDTH = 800;
@@ -186,6 +187,10 @@ int main()
         ImGui::Checkbox("Use Color", &useColor);
         ImGui::End();
 
+        ImGui::Begin("Change Colour");
+        ImGui::ColorEdit3("Vertex Color", (float*)&vertexColor);
+        ImGui::End();
+
         // render
         // ------
         glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
@@ -299,23 +304,23 @@ void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
 
 void generateSierpinskiTetrahedron(std::vector<float>& vertices, glm::vec3 a, glm::vec3 b, glm::vec3 c, glm::vec3 d, int depth) {
     if (depth == 0) {
-        // Add the vertices of the tetrahedron
+        // Dodaj wierzcho³ki z kolorem
         vertices.insert(vertices.end(), {
-            a.x, a.y, a.z, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f,
-            b.x, b.y, b.z, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f,
-            c.x, c.y, c.z, 0.0f, 0.0f, 1.0f, 0.5f, 1.0f,
+            a.x, a.y, a.z, vertexColor.r, vertexColor.g, vertexColor.b, 1.0f, 0.0f,
+            b.x, b.y, b.z, vertexColor.r, vertexColor.g, vertexColor.b, 0.0f, 0.0f,
+            c.x, c.y, c.z, vertexColor.r, vertexColor.g, vertexColor.b, 0.5f, 1.0f,
 
-            a.x, a.y, a.z, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f,
-            b.x, b.y, b.z, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f,
-            d.x, d.y, d.z, 0.0f, 0.0f, 1.0f, 0.5f, 1.0f,
+            a.x, a.y, a.z, vertexColor.r, vertexColor.g, vertexColor.b, 1.0f, 0.0f,
+            b.x, b.y, b.z, vertexColor.r, vertexColor.g, vertexColor.b, 0.0f, 0.0f,
+            d.x, d.y, d.z, vertexColor.r, vertexColor.g, vertexColor.b, 0.5f, 1.0f,
 
-            a.x, a.y, a.z, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f,
-            c.x, c.y, c.z, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f,
-            d.x, d.y, d.z, 0.0f, 0.0f, 1.0f, 0.5f, 1.0f,
+            a.x, a.y, a.z, vertexColor.r, vertexColor.g, vertexColor.b, 1.0f, 0.0f,
+            c.x, c.y, c.z, vertexColor.r, vertexColor.g, vertexColor.b, 0.0f, 0.0f,
+            d.x, d.y, d.z, vertexColor.r, vertexColor.g, vertexColor.b, 0.5f, 1.0f,
 
-            b.x, b.y, b.z, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f,
-            c.x, c.y, c.z, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f,
-            d.x, d.y, d.z, 0.0f, 0.0f, 1.0f, 0.5f, 1.0f,
+            b.x, b.y, b.z, vertexColor.r, vertexColor.g, vertexColor.b, 1.0f, 0.0f,
+            c.x, c.y, c.z, vertexColor.r, vertexColor.g, vertexColor.b, 0.0f, 0.0f,
+            d.x, d.y, d.z, vertexColor.r, vertexColor.g, vertexColor.b, 0.5f, 1.0f,
             });
     }
     else {
