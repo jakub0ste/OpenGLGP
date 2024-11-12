@@ -12,10 +12,13 @@
 #include "Shader.h"
 #include "Camera.h"
 
+#include <vector>
+
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 void mouse_callback(GLFWwindow* window, double xpos, double ypos);
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
 void processInput(GLFWwindow* window);
+void generateSierpinskiTetrahedron(std::vector<float>& vertices, glm::vec3 a, glm::vec3 b, glm::vec3 c, glm::vec3 d, int depth);
 
 // settings
 const unsigned int SCR_WIDTH = 800;
@@ -39,7 +42,6 @@ int main()
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-
 
 #ifdef __APPLE__
     glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
@@ -71,28 +73,13 @@ int main()
 
     // set up vertex data (and buffer(s)) and configure vertex attributes
     // ------------------------------------------------------------------
-    float vertices[] = {
-        // positions            // colors          // text cords
-        -0.5f, -0.5f, 0.0f,    1.0f, 0.0f, 0.0f,  1.0f, 0.0f,      // bottom left
-        0.5f, -0.5f, 0.0f,     0.0f, 1.0f, 0.0f,  0.0f, 0.0f,      // bottom right
-        0.0f,  0.5f, -0.5f,    0.0f, 0.0f, 1.0f,  0.5f, 1.0f,      // top 
-
-        // positions            // colors          // text cords
-        -0.5f, -0.5f, 0.0f,    1.0f, 0.0f, 0.0f,  1.0f, 0.0f,      // bottom left
-        0.5f, -0.5f, 0.0f,     0.0f, 1.0f, 0.0f,  0.0f, 0.0f,      // bottom right
-        0.0f,  -0.5f, -1.0f,   0.0f, 0.0f, 1.0f,  0.5f, 1.0f,      // top 
-
-        // positions           // colors          // text cords
-       -0.5f, -0.5f, 0.0f,    1.0f, 0.0f, 0.0f,  1.0f, 0.0f,       // bottom right
-       0.0f,  -0.5f, -1.0f,   0.0f, 1.0f, 0.0f,  0.0f, 0.0f,      // bottom left
-       0.0f,  0.5f, -0.5f,    0.0f, 0.0f, 1.0f,  0.5f, 1.0f,       // top 
-
-       // positions           // colors          // text cords
-      0.5f,  -0.5f, 0.0f,    1.0f, 0.0f, 0.0f,  1.0f, 0.0f,      // bottom right
-      0.0f, -0.5f, -1.0f,    0.0f, 1.0f, 0.0f,  0.0f, 0.0f,      // bottom left
-      0.0f,  0.5f, -0.5f,    0.0f, 0.0f, 1.0f,  0.5f, 1.0f,      // top 
-
-    };
+    std::vector<float> vertices;
+    glm::vec3 a(-0.5f, -0.5f, 0.0f);
+    glm::vec3 b(0.5f, -0.5f, 0.0f);
+    glm::vec3 c(0.0f, 0.5f, -0.5f);
+    glm::vec3 d(0.0f, -0.5f, -1.0f);
+    int depth = 3; // Adjust depth as needed
+    generateSierpinskiTetrahedron(vertices, a, b, c, d, depth);
 
     unsigned int VBO, VAO;
     glGenVertexArrays(1, &VAO);
@@ -101,7 +88,7 @@ int main()
     glBindVertexArray(VAO);
 
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(float), vertices.data(), GL_STATIC_DRAW);
 
     // position attribute
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
@@ -157,7 +144,6 @@ int main()
 
     glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
-
     // render loop
     // -----------
     while (!glfwWindowShouldClose(window))
@@ -190,7 +176,7 @@ int main()
         ourShader.setMat4("model", model);
 
         glBindVertexArray(VAO);
-        glDrawArrays(GL_TRIANGLES, 0, 12);
+        glDrawArrays(GL_TRIANGLES, 0, vertices.size() / 8);
 
         // glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)
         // -------------------------------------------------------------------------------
@@ -265,4 +251,40 @@ void mouse_callback(GLFWwindow* window, double xposIn, double yposIn)
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
 {
     camera.ProcessMouseScroll(static_cast<float>(yoffset));
+}
+
+void generateSierpinskiTetrahedron(std::vector<float>& vertices, glm::vec3 a, glm::vec3 b, glm::vec3 c, glm::vec3 d, int depth) {
+    if (depth == 0) {
+        // Add the vertices of the tetrahedron
+        vertices.insert(vertices.end(), {
+            a.x, a.y, a.z, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f,
+            b.x, b.y, b.z, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f,
+            c.x, c.y, c.z, 0.0f, 0.0f, 1.0f, 0.5f, 1.0f,
+
+            a.x, a.y, a.z, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f,
+            b.x, b.y, b.z, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f,
+            d.x, d.y, d.z, 0.0f, 0.0f, 1.0f, 0.5f, 1.0f,
+
+            a.x, a.y, a.z, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f,
+            c.x, c.y, c.z, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f,
+            d.x, d.y, d.z, 0.0f, 0.0f, 1.0f, 0.5f, 1.0f,
+
+            b.x, b.y, b.z, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f,
+            c.x, c.y, c.z, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f,
+            d.x, d.y, d.z, 0.0f, 0.0f, 1.0f, 0.5f, 1.0f,
+            });
+    }
+    else {
+        glm::vec3 ab = (a + b) / 2.0f;
+        glm::vec3 ac = (a + c) / 2.0f;
+        glm::vec3 ad = (a + d) / 2.0f;
+        glm::vec3 bc = (b + c) / 2.0f;
+        glm::vec3 bd = (b + d) / 2.0f;
+        glm::vec3 cd = (c + d) / 2.0f;
+
+        generateSierpinskiTetrahedron(vertices, a, ab, ac, ad, depth - 1);
+        generateSierpinskiTetrahedron(vertices, ab, b, bc, bd, depth - 1);
+        generateSierpinskiTetrahedron(vertices, ac, bc, c, cd, depth - 1);
+        generateSierpinskiTetrahedron(vertices, ad, bd, cd, d, depth - 1);
+    }
 }
