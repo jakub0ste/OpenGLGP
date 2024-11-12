@@ -23,6 +23,8 @@ void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
 void processInput(GLFWwindow* window);
 void generateSierpinskiTetrahedron(std::vector<float>& vertices, glm::vec3 a, glm::vec3 b, glm::vec3 c, glm::vec3 d, int depth);
 
+bool useColor = false;
+
 // settings
 const unsigned int SCR_WIDTH = 800;
 const unsigned int SCR_HEIGHT = 600;
@@ -179,6 +181,11 @@ int main()
         ImGui::SliderInt("Recursion Depth", &recursionDepth, 0, 5);
         ImGui::End();
 
+        // ImGui window
+        ImGui::Begin("Settings");
+        ImGui::Checkbox("Use Color", &useColor);
+        ImGui::End();
+
         // render
         // ------
         glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
@@ -194,6 +201,8 @@ int main()
 
         // activate shader
         ourShader.use();
+
+        ourShader.setBool("useColor", useColor);
 
         glm::mat4 projection = glm::perspective(glm::radians(camera.Zoom), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
         ourShader.setMat4("projection", projection);
